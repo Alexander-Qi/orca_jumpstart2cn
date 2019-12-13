@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018/W32TeX) (preloaded format=xelatex 2019.1.27)  13 DEC 2019 11:23
+This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018/W32TeX) (preloaded format=xelatex 2019.1.27)  13 DEC 2019 11:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1121,22 +1121,23 @@ Package fontspec Info: Font family 'Consolas(0)' created for font 'Consolas'
 
 [5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20]
 [21] [22] [23] [24] [25] [26]
-Underfull \hbox (badness 10000) in paragraph at lines 1113--1113
+Underfull \hbox (badness 10000) in paragraph at lines 1116--1116
 []|\TU/SimSun(0)/m/n/10.53937 包 含 \TU/lmr/m/n/10.53937 Hessian \TU/SimSun(0)/m/
 n/10.53937 矩 阵  |（频 率 计 算） 。|  可 以 用
  []
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1117.
-Package atenddvi Info: Last page = 27.
 [27]
-Package atveryend Info: Executing hook `AfterLastShipout' on input line 1117.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1120.
+Package atenddvi Info: Last page = 28.
+ [28]
+Package atveryend Info: Executing hook `AfterLastShipout' on input line 1120.
  (./jumps.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1117.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1117.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1120.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1120.
 
 Package rerunfilecheck Info: File `jumps.out' has not changed.
 (rerunfilecheck)             Checksum: 77B1FF0CCDC4F6436EB0FBFE15EDC939.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1117.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1120.
  ) 
 Here is how much of TeX's memory you used:
  27434 strings out of 492933
@@ -1147,4 +1148,4 @@ Here is how much of TeX's memory you used:
  1348 hyphenation exceptions out of 8191
  54i,18n,68p,807b,33187s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on jumps.pdf (27 pages).
+Output written on jumps.pdf (28 pages).
