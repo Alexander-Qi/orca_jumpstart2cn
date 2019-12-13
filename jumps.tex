@@ -1,0 +1,1117 @@
+\documentclass{ctexart}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{url}
+\usepackage{framed}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage[final]{pdfpages}
+\usepackage{threeparttable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{hyperxmp}
+\usepackage{fontspec}
+\graphicspath{{fig/}}
+
+
+\hypersetup{pdfinfo={
+		Author = {Frank Neese, Christoph Riplinger, et al},
+		Title = {Jump-Start for ORCA 4.1},
+		Subject = Draft version,
+		Keywords = {ORCA, Chinese, translation},},
+	pdfcopyright = {Copyright (C) 2019 by Jian-Qing Qi.
+		All rights reserved.},
+	pdflicenseurl = {https://alexander-qi.github.io/}}
+
+\usepackage[text={7in,9in},centering]{geometry}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{弗兰克·内斯和克里斯托夫·里普林格等著}
+\fancyhead[R]{戚鉴清译}
+\fancyfoot{}
+\fancyfoot[L]{\textbf{量子化学软件ORCA快速入门指南}}
+\fancyfoot[C]{\textit{适用于ORCA 4.1}}
+\fancyfoot[R]{\thepage}
+
+\lstset{
+	%backgroundcolor=\color{red!50!green!50!blue!50},%代码块背景色为浅灰色
+	basicstyle=\fontspec{Consolas},
+	keywordstyle=\fontspec{Consolas Bold},
+	commentstyle=\fontspec{Consolas Italic},
+	rulesepcolor= \color{gray}, %代码块边框颜色
+	breaklines=true,  %代码过长则换行
+	numbers=left, %行号在左侧显示
+	numberstyle= \small,%行号字体
+	%keywordstyle= \color{blue},%关键字颜色
+	commentstyle=\color{gray}, %注释颜色
+	frame=shadowbox%用方框框住代码块
+}
+
+\newcommand{\cmd}[1]{\textcolor{orange}{ \texttt{#1} }}
+\newcommand{\module}[1]{\fcolorbox{gray}{yellow}{ \texttt{#1} }}
+\newcommand{\file}[1]{\textcolor{teal}{ \texttt{#1} }}
+
+\begin{document}
+
+	
+\includepdf[pages=-]{fig/covb.pdf}
+
+	\section*{译者序}
+	本文原文是2018年3月Frank Neese和Christoph Riplinger等人编著的\textit{Jump-Start Guide}，适用的ORCA版本为4.1，不过其中的大部分内容应该对4.0以后的版本是通用的。大家可以放心使用。本文旨在为想快速入门量子化学软件套装ORCA（后文中用ORCA指代）的用户提供指南，并不能替代ORCA用户手册。原版ORCA手册可以在\href{https://hostr.co/ElQbdeKxt5jQ}{这里}下载。原作者关于CASSCF的教程可以在\href{https://hostr.co/0y7fujk5KEAa}{这里}下载。
+	
+	本文译者是戚鉴清，翻译完成时为清华大学化学系本科二年级的学生。限于译者的业务水平限制，本书中不可避免地存在翻译不当的地方。英文原文的文档可以在\href{https://hostr.co/i613jRFj7YNo}{这里}找到。欢迎读者通过\href{mailto:alexanderqi126@outlook.com}{邮件}联系指正！
+		
+
+	
+	
+	\begin{flushright}
+		\includegraphics[width=1.8cm]{sign.eps}
+		
+		2019年12月于清华园
+	\end{flushright}
+	\newpage
+
+			\tableofcontents
+			\newpage
+	
+	\section{运行ORCA的通用流程}
+	\begin{enumerate}[1.]
+		\item 确保你系统中ORCA所在的路径在环境变量中
+		\item 取得一个ACSII编码的输入文件，例如\file{MyJob.inp}
+		\item 运行命令\cmd{orca MyJob.inp >\& MyJob.out \&}。这个命令至少会产生\file{MyJob.out}和\file{MyJob.gbw}两个文件。\file{MyJob.gbw}是一个包含了分子结构、基组和轨道信息的二进制文件，它对于重新开始计算任务或者把前一个计算任务的结果用于后一个的输入来说都是必要的。
+	\end{enumerate}
+	
+	\section{输入文件}
+	输入文件的通用结构如下所示：
+	
+	\begin{lstlisting}
+#井号后的内容是注释，你可以想写什么写什么
+! {Keywords} 			#控制了方法、基组、工作类型
+! moread 		#备选项：让程序从已有的分子轨道开始计算需要%moinp关键词
+%moinp “MyInp.gbw” 		#备选项：在此处输入已有的轨道信息
+%maxcore 4096 			#备选项：以MB为单位，限制临时文件的大小
+%base “MyBaseName” 		#备选项：规定临时文件的文件名
+* xyz {Charge} {Mult} 		#输入坐标类型，电荷和自旋多重度
+C 1.23 16.481 -9.87 		#笛卡尔坐标的默认单位是埃
+* 				#坐标输入区结束
+$new_job
+#可以新建一个任务，以此类推
+	\end{lstlisting}
+	
+	关键字可以按任意顺序给出，也不需要放在一行上，并且不区分大小写。输入的分子轨道的基组不需要与要执行的计算的基组相同；并且也不需要与输入文件中的分子结构完全匹配（但原子个数、类型及其顺序必须匹配）。
+	
+	\section{坐标输入}
+	输入文件中的坐标有两种写法：笛卡尔坐标和内坐标。
+	
+	笛卡尔坐标：
+	\begin{lstlisting}
+! Angs or Bohrs #备选项：默认单位是埃
+* xyz {charge} {multiplicity}
+C 0.0 0.0 0.0 #这个原子的笛卡尔坐标
+O 0.0 0.0 1.128
+*
+	\end{lstlisting}
+	
+	内坐标：
+	\begin{lstlisting}
+* int {charge} {multiplicity}
+AT NA NB NC R A D 
+*
+	\end{lstlisting}
+	
+	其中各缩写的意义是：
+	
+\begin{table}[H]
+	\centering
+	\begin{tabular}{ll}
+		\toprule
+		\textbf{缩写} & \textbf{含义}     \\
+		\midrule
+		AT & 原子种类   \\
+		NA & 距离     \\
+		NB & 角度     \\
+		NC & 二面角    \\
+		R  & 实际距离   \\
+		A  & 角度制角度  \\
+		D  & 角度制二面角\\
+		\bottomrule
+	\end{tabular}
+\end{table}
+	
+	也可以直接从外部文件读取坐标：
+	\begin{lstlisting}
+*xyzfile {charge} {multiplicity} myCoordinateFile.xyz
+	\end{lstlisting}
+	
+	\cmd{charge}是分子的总电荷，\cmd{multiplicity}是分子的自旋多重度（等于分子总自旋数的两倍再加一）。注意，对于开壳层体系来说，一般进行的是不限制自旋的计算，请不要保留实际的自旋多重度。
+	
+	你也可以输入并运行对于一系列结构的计算，详细的见手册。
+	
+	\section{基组}
+	ORCA中使用\cmd{! \{BasisSet\}}来指定基组。支持的基组有：
+	\begin{lstlisting}
+BasisSet= 
+	def2-SVP, def2-TZVP, def2-TZVPP, def2-QZVPP,
+	ma-def2-SVP, ma-def2-TZVP, ma-def2-TZVPP, ma-def2-QZVPP,
+	cc-pVnZ, aug-cc-pVnZ, cc-pCVnZ, aug-cc-pCVnZ (n= D,T,Q,5,6)
+	\end{lstlisting}
+	
+	推荐在使用后HF和密度泛函计算时使用def2系列基组。
+	
+	在默认情况下，ORCA中的基组会启用ECP赝势。Def2系列基组会自动为铷（37号元素）到氡（86号元素）加载Stuttgart-Dresden等效核势。
+	
+	手册中记录了许多其他的基组。基组可以从文件读取或手动输入，也可以使用 （\cmd{! PrintBasis}） 来输出基组。修改过的基集可以使用以下方式输入：
+	\begin{lstlisting}
+%basis GTOName “MyGTOBasis.bas” end
+	\end{lstlisting}
+	
+	基组文件的格式实质上是来自于GAMESS-US的EMSL库的格式。ORCA能接受非标准的基组，并将它们标准化。标准化基组可由\cmd{! PrintBasis}输出。特定原子或原子类型的单个基础集也可以在输入中给出，如手册中所述。
+	
+	\section{辅助基组}
+	使用了RI（密度拟合）近似的方法需要一个辅助的基组。例如，纯密度泛函的计算就是默认在开启RI的模式下运行的，因此，辅助基组在很多时候是必须的。ORCA中可用以下关键词指定辅助基组。
+	\begin{lstlisting}
+! {AuxBasisSet}
+	\end{lstlisting}
+	
+	以下是关于规定辅助基组的一些细节：
+	
+	\begin{lstlisting}
+AuxBasisSet=def2/J, SARC/J
+	\end{lstlisting}
+	以上关键词适用于开启了RI的密度泛函（包括GGA和meta-GGA）的Coulomb积分计算。其中，SARC/J适用于标量全电子相对论计算。
+	\begin{lstlisting}
+AuxBasisSet= 
+	def2-SVP/C, def2-TZVP/C, def2-TZVPP/C, def2-QZVPP/C, 
+	cc-pVnZ/C, aug-cc-pVnZ/C (n=D,T,Q,5,6)
+	\end{lstlisting}
+	以上关键词适用于MP2和耦合簇方法的电子相关能计算。
+	
+	\begin{lstlisting}
+AuxBasisSet= def2/JK, cc-pVnZ/JK, aug-cc-pVnZ/JK (n=T,Q,5)
+	\end{lstlisting}
+	适用于HF和杂化泛函的Coulomb积分和交换积分
+	
+	若既需要算电子相关能计算，又需要解自洽场方程，可以指定两个辅助基组。
+	
+	\begin{lstlisting}
+! AutoAux
+	\end{lstlisting}
+	
+	该命令可以自动构筑较通用的辅助基组，可同时满足Coulomb积分、交换积分和电子相关能的计算。该基组准确，但也明显比特地优化过的基组要大。在不确定该用什么基组时或非标准轨道体系中比较实用。
+	
+	\section{密度泛函}
+	
+	在ORCA中使用密度泛函的通用关键词如下所示：
+	\begin{lstlisting}
+! {Functional} GridN NoFinalGrid {VDW}
+	\end{lstlisting}
+	其中，\cmd{\{Functional\}}可以是：
+	\begin{table}[H]
+		\centering
+		\begin{tabularx}{0.9\linewidth}{lX}
+			\toprule
+			\textbf{泛函类型}          & \textbf{泛函}                                                             \\
+			\midrule
+			局域密度近似方法      & LSD, HFS, ...                                                    \\
+			广义梯度近似方法      & BP=BP86, PBE, PW91, OLYP, OPBE, BLYP, PWP, ...                   \\
+			含动能密度的广义梯度近似法 & TPSS, revTPSS, M06L, ...                                         \\
+			杂化泛函          & B3LYP, PBE0, X3LYP, BHandHLYP, B3P, B3PW, ...                    \\
+			距离分隔杂化泛函      & wB97, wB97X, CAM-B3LYP, LC-BLYP                                \\
+			杂化含动能密度泛函     & TPSSh, TPSS0, M06, M062X, ...                                  \\
+			双杂化泛函         & RI-B2PLYP, RI-MPW2PLYP, RI-B2T-PYLP, RI-B2K-PYLP, RI-B2GP-PLYP\\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+	以上的方法都适用于无RI的情况。在RI下，使用LDA和GGA需要一个辅助基组（/J）；使用双杂化泛函也需要一个辅助基组（/C）。在手册中记录有更多的基组。
+	\begin{lstlisting}
+GridN		#指定格点大小，如Grid1, Grid2, …, Grid7
+NoFinalGrid	#不在最后使用较大格点
+FinalGridN	#指定最后计算能量时的格点大小，N = 0-7
+	\end{lstlisting}
+	
+	默认情况是结合使用Grid2（110个格点）和Grid4（302个格点）
+	
+	\begin{lstlisting}
+VDW=
+	D3BJ 	#使用Becke Johnson阻尼的Grimme原子对色散校正（推荐）
+	D3Zero 	#无阻尼的原子对色散校正
+	D2 	#Grimme原子对色散校正
+	\end{lstlisting}
+	
+	\section{用于优化的组合式方法}
+	\begin{lstlisting}
+! HF-3c, PBEh-3c, B97-3c
+	\end{lstlisting}
+	
+	上述的三个方法是Grimme发展的较便宜的组合式方法，专为在小基组下进行结构优化而设计。这些方法都包括对DFT-D3、BSSE、基组不完备性的校正项。
+	
+	\section{自洽场方程的计算}
+	\begin{lstlisting}
+! {SCF-Keywords}
+	\end{lstlisting}
+	
+	\begin{lstlisting}
+SCF-Keywords= 
+	SP		#单点能计算
+	NormalSCF	#正常自洽场收敛标准
+	TightSCF	#严格的自洽场收敛标准
+	VeryTightSCF	#严格的自洽场收敛标准
+	SlowConv	#预期收敛较慢
+	LShift		#开启电平转换
+	SOSCF		#打开二阶近似自洽场
+	NRSCF		#打开牛顿-拉夫森自洽场
+	DIIS		#打开DIIS
+	Direct		#直接积分模式
+	Conv		#传统积分模式
+	RHF		#闭壳层计算
+	UHF		#非限制性自旋计算
+	ROHF		#限制性开壳层计算，需要更多输入参数
+	\end{lstlisting}
+	
+	除非涉及过渡金属，否则默认情况是DIIS和SOSCF的组合。
+	同时默认运行单重态封闭壳，且更高的多重性旋转不受限制。
+	复合体KDIIS SOSCF通常是快速收敛的理想选择，但可能不如电子难物种的默认值强。
+	
+	\subsection{强大的近似：RI} 
+	
+	\begin{lstlisting}
+! RI
+	\end{lstlisting}
+	
+	为纯泛函而设计，默认开启，若需关闭请输入\cmd{NoRI}
+	
+	\begin{lstlisting}
+! RIJCOSX
+	\end{lstlisting}
+	
+	为HF方法和杂化泛函而设计的强大的近似。会用RI来处理Coulomb积分，用半数值法处理交换积分。需要使用辅助基组（/J）和X格点来用半数值法处理交换积分。格点控制方法如下：
+	\begin{lstlisting}
+GridXN  #N = 1-9，如GridX6
+	\end{lstlisting}
+	
+	\begin{lstlisting}
+! RI-JK
+	\end{lstlisting}
+	
+	完全用RI来处理Coulomb积分和交换积分。需要辅助基组（/JK），同时不太适用于大体系。
+	
+	\section{多组态自洽场方法} 
+	
+	CASSCF方法不适合心理脆弱的人！它往往要求使用者仔细检查轨道并频繁地需要手动调整来让自洽场收敛。考虑到情况复杂，我们在另一份文档中准备了一份CASSCF的教程来帮助用户解决最常见的一些问题。手册中也提供了许多额外的信息。
+	
+	在大多数比较基础的情况中，只要使用以下关键词就好：
+	
+	\begin{lstlisting}
+%casscf 
+	nel n		#工作区电子数
+	norb m		#工作区轨道数
+	nroots N	#平均状态数
+	nevpt2 true	#计算二阶动力学校正能
+end
+	\end{lstlisting}
+	
+	\section{溶剂化模型} 
+	\begin{lstlisting}
+! CPCM({Solvent})
+  或
+! CPCM
+	\end{lstlisting}
+	
+	其中，溶剂包括：
+	\begin{lstlisting}
+Solvent = 
+	Water,Acetonitrile, Acetone, Ammonia, 
+	Ethanol, Methanol, CH2Cl2, CCl4, DMF, 
+	DMSO, Pyridine, THF, Chloroform, Hexane, Toluene
+	\end{lstlisting}
+	
+	只使用\cmd{! CPCM}关键词会使用无限电介质模型。若需使用SMD模型，则可以使用以下命令来使用ORCA内置的179种溶剂。
+	
+	\begin{lstlisting}
+!CPCM	
+%cpcm smd true	#默认情况下关闭
+	solvent “Name”
+end
+	\end{lstlisting}
+	
+	你也可以手动指定溶剂化参数，详情请见手册。
+	
+	\section{Møller-Plesset微扰理论} 
+	\begin{lstlisting}
+! MP2, SCS-MP2, F12-MP2, RI-MP2, RI-SCS-MP2, F12-RI-MP2, DLPNO-MP2, F12- DLPNO-MP2, OO-RI-MP2, OO-RI-SCS-MP2, MP3, RI-MP3, SCS-MP3, RI-SCS-MP3
+	\end{lstlisting}
+	
+	并注意设置缓存空间：
+	\begin{lstlisting}
+%maxcore 2048	#需要较大的内存
+	\end{lstlisting}
+	
+	若需在使用微扰法时采用RI来加速计算，那么需要一个辅助相关基组（/C）。除此以外，RIJCOSX和RI-JK也可以用来加快自洽场计算，当然同样也需要相对应的辅助基组。无论是否使用RI，ORCA都支持MP2方法的解析梯度。
+	
+	\section{耦合簇方法} 
+	\begin{lstlisting}
+! {CC-Variant} Extrapolate(n/m,bas)
+	\end{lstlisting}
+	
+	关键词\cmd{extrapolate}可以自动将标准化基组的计算结果外推到完备基组下的结果。
+	
+	\begin{lstlisting}
+%maxcore 2048	# higher maxcore required 
+	\end{lstlisting}
+	
+	具体的耦合簇方法包括：
+	\begin{lstlisting}
+CCSD, CCSD(T), QCISD, QCISD(T)
+	\end{lstlisting}
+	
+	\begin{lstlisting}
+CCSD-F12, CCSD(T)-F12, QCISD-F12, QCISD(T)-F12
+	\end{lstlisting}
+	
+	F12方法需要与之对应的基组(‘-F12’ and ‘-F12/CABS’)
+	\begin{lstlisting}
+CCSD-F12/RI, CCSD(T)-F12/RI, QCISD-F12/RI, QCISD(T)-F12/RI
+	\end{lstlisting}
+	在使用RI的时候，除了与F12对应的基组，还需要一个常规的辅助基组（/C）。建议将辅助基组选的比F12对应基组稍大一些。如\cmd{! cc-pVDZ-F12 cc- pVDZ-F12-CABS cc-pVTZ/C}。
+	\begin{lstlisting}
+CPF/1, NCPF/1, CEPA/1, NCEPA/1
+	\end{lstlisting}
+	\begin{lstlisting}
+DLPNO-CCSD, DLPNO-CCSD(T), DLPNO-QCISD, DLPNO-QCISD(T)
+	\end{lstlisting}
+	ORCA是支持省时省力的DLPNO-CCSD方法的先驱。使用DLPNO方法时需要一个辅助基组（/C）
+	
+	
+	接下来解释\cmd{Extrapolate(n/m,bas)}中两个参数的含义。
+	\begin{lstlisting}
+n/m: 主要数字的组合, n,m = 2-5; n < m
+	\end{lstlisting}
+	
+	此关键词将SCF和CC-Variant能量外推至完备基组。手册中介绍了更多的外推方法。
+	\begin{lstlisting}
+bas: cc, aug-cc, cc-core, ano, saug-ano, aug-ano, def2
+	\end{lstlisting}
+	耦合簇密度可用于闭壳层和开壳层体系（在DLPNO情况下也是如此），但ORCA不支持耦合簇的解析梯度和Hessian矩阵。
+	
+	\section{相对论计算} 
+	通用关键词为：
+	\begin{lstlisting}
+! {RelMethod} {BasisSet} {AuxBasisSet}
+	\end{lstlisting}
+	
+	其中：
+	\begin{lstlisting}
+RelMethod= ZORA, DKH, DKH2, ZORA/RI
+	\end{lstlisting}
+	\begin{lstlisting}
+BasisSet =	ZORA-def2-XVP, DKH-def2-XVP, ma-ZORA-def2-XVP, ma-DKH-def2-XVP (XVP代表所有def2系列基组)
+	\end{lstlisting}
+	以上这些是对相对论计算做了适配的def2系列基组，支持从氢（1号）到氪（36号）元素。
+	
+	\begin{lstlisting}
+SARC-DKH-TZVPP, SARC-ZORA-TZVPP
+	\end{lstlisting}
+	以上两个基组应和DKH2或ZORA一同使用，支持氙（54号）以后的元素。
+	\begin{lstlisting}
+AuxBasisSet= SARC/J
+	\end{lstlisting}
+	手册中介绍了更多可用的基组。自旋-轨道耦合可通过准简并微扰或线性响应理论在各种体系下得到得当的处理。ORCA不使用相对论转子的两分量或四分量计算（作者根本不喜欢这些方法）。
+	
+	\section{结构优化} 
+	\begin{lstlisting}
+! {OptMethod} TightOpt
+	\end{lstlisting}
+	
+	其中，\cmd{TightOpt}关键词可增加收敛标准，默认是\cmd{NormalOpt}。
+	
+	\cmd{OptMethod} 包含以下几种：
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{关键词}    & \textbf{含义}                     \\
+			\midrule
+			\cmd{Opt}    & 在内坐标下进行标准的优化           \\
+			\cmd{Copt}   & 在笛卡尔坐标下进行优化            \\
+			\cmd{OptTS}  & 进行寻找过渡态的优化             \\
+			\cmd{ScanTS} & 首先进行柔性扫描随后自动进行寻找过渡态的优化\\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	手册中还记载了有限优化，势能面扫描，最小能量交叉点优化，QM/MM优化等许多其他优化选项。
+	
+	\section{频率计算} 
+	
+	\begin{lstlisting}
+! Freq
+	\end{lstlisting}
+	该关键词可进行解析频率计算。
+	\begin{lstlisting}
+! NumFreq
+	\end{lstlisting}
+	进行数值频率计算。
+	
+	\section{并行}
+	\begin{lstlisting}
+! palN
+	\end{lstlisting}
+	该命令可以令ORCA使用N个处理器核心并行执行计算任务，不过需要安装MicrosoftMPI（Windows）或OpenMPI（Linux）。其中N=2-8、16等。
+	
+	也可以用代码块的形式定义并行数。
+	\begin{lstlisting}
+%pal nprocs N end
+	\end{lstlisting}
+	其中N为任意整数。
+	
+	\section{激发态计算} 
+	许多ORCA模块都可以计算激发态，且都能够在各种理论水平上产生各类吸收光谱和圆二色性光谱。不过仅TD-DFT/CIS具有解析梯度。
+	
+	\subsection{时变密度泛函理论（TD-DFT）} 
+	\begin{lstlisting}
+%tddft 
+	NRoots 10	#激发态数量
+	MaxDim 100	#扩展空间最大大小
+	TDA true	#是否使用Tamm-Dancoff近似
+	Triplets true	#是否对闭壳层体系计算三重激发
+end
+	\end{lstlisting}
+	
+	请注意，此输入方式对于在Hartree-Fock框架下进行CIS或RPA计算也有效。手册中具体讨论了许多其他加快TD-DFT计算、色散校正、解析梯度的选项。该输入可与\cmd{RIJCOSX}一起使用，但不能与\cmd{RI-JK}一起使用（但有类似\cmd{RI-JK}的选项）。
+	
+	\subsection{运动耦合簇理论} 
+	\begin{lstlisting}
+! EOM-CCSD
+  或
+%mdci doeom true end
+	\end{lstlisting}
+	
+	同时也必须规定激发态数量和其他选项。EOM还能够计算电离能，并且可以处理RHF和UHF参考函数。对于UHF参考来说，由于虚拟激发受到强烈的自旋污染，因此必须谨慎对待虚拟激发的DOMO。如手册中所述，某些关键词也可以使用COSX近似。与TDDFT不同，过渡属性需要额外的计算量，尽管在计算结束时会打印出便宜的近似值。
+	\begin{lstlisting}
+%mdci	
+	NRoots 10
+	NDav 20		#将最大区域定义为NDav*NRoots
+	DoRootwise true	#一次计算一个激发态，通常更稳定
+	CCSD2		#具有MP2成分的EOM，仅用于RHF参考 
+	FollowCIS true	#遵循CIS的解而非能级顺序
+	DoTDM true	#计算过渡态性质
+end
+	\end{lstlisting}
+	
+	计算激发态的更便宜却准确的选择是调用EOM（STEOM）的相似变换版本：
+	\begin{lstlisting}
+! STEOM-CCSD
+	\end{lstlisting}
+	或者
+	\begin{lstlisting}
+%mdci dosteom true end
+	\end{lstlisting}
+	关键字\cmd{NRoots}，\cmd{NDav}和\cmd{DoRootwise}的功能与EOM的情况相似。一些STEOM专用关键字包括
+	\begin{lstlisting}
+%mdci	
+	DoTriplet true	 
+	OThresh 0.001	#填充区域的CIS截断系数
+	VThresh 0.001	#空区域的CIS阶段系数
+end
+	\end{lstlisting}
+	
+	\cmd{Triplet}选项仅适用于闭合壳计算。STEOM方法需选择活跃工作区来定义相似度转换，这是自动完成的，但也可以手动设置参数，其中最重要的参数是已占用和虚拟空间的CIS中止参数。对于闭壳计算，可以结合基态的DLPNO-CCSD计算执行EOM和STEOM，然后将其转换为规范基组下的结果，请参见手册中的bt-PNO选项。
+	
+	\subsection{限制性开壳层CIS和ROCIS/DFT} 
+	\begin{lstlisting}
+%rocis 
+	NRoots 10
+	MaxDim 100
+end
+	\end{lstlisting}
+	上述代码块可以运行在RHF或者高自旋ROHF参考函数下进行CIS计算。
+	\begin{lstlisting}
+! B3LYP/BHLYP
+%rocis 
+	NRoots 10
+	MaxDim 100
+	DoDFTCIS true			#唤出ROCIS/DFT计算
+	DFTCIS_c = 0.20, 0.40, 0.30	#B3LYP的参数
+end
+	\end{lstlisting}
+	上述的代码可以运行ROCIS/DFT计算。
+	
+	另外，也可以在准简并微扰理论（QDPT）的框架内处理相对论效应或自旋轨道耦合（SOC）。许多其他选项可用于加速ROCIS的计算并控制计算输出。这些在手册中有详细的讨论。
+	
+	\subsection{N电子价态微扰理论（NEVPT2）} 
+	在使用任何有效的CASSCF输入的基础上，可以用很简单的关键词来设置高度收缩或完全内部收缩的NEVPT2计算。
+	\begin{lstlisting}
+!NEVPT2, RI-NEVPT2		#高度收缩
+!FIC-NEVPT2, DLPNO-NEVPT2	#完全内部收缩
+	\end{lstlisting}
+	
+	在\cmd{\%CASSCF}代码块和NEVPT子块中可以对计算进行非常精确的设置（例如F12校正，RI近似等），详细信息请参见手册。NEVPT2可计算许多特性和光谱。CASSCF教程（可从我们的网站下载）涵盖了有关该主题的许多示例。
+	
+	\subsection{多参考构象相互作用（MRCI）} 
+	
+	\module{orca\_mrci}模块中包含传统的不收缩的MRCI方法，也具有大量的中止选项；并允许计算各种光谱和属性（SOC，SSC，MCD，g张量，D张量等）。我们的CASSCF教程和手册中有大量这种示例。输入文件中至少应该包含一套轨道和多重度。
+	\begin{lstlisting}
+!MORead Allowrhf NoIter #从CASSCF、HF中读入任一轨道
+%moinp “start.gbw”
+%mrci
+	citype MRCI	#MRCI, SORCI, MRDDCI3, MRDDCI2,MRDDCI1,...
+	newblock M *			#多重度代码块，*可以用IRREP替代
+		ref	CAS(n,m) end	#参考波函数，也可以用RAS或CFG
+		NRoots N
+	end 
+end
+	\end{lstlisting}
+	除了不收缩的MRCI，ORCA中的\module{orca\_autoci}组件含有完全内部收缩的MRCI。其输入和标准的CASSCF输入非常像，它的参考波函数必须是CAS-CI型。
+
+	\begin{lstlisting}
+!MORead CASSCF NoIter #读取CASSCF轨道
+%moinp “start.gbw”
+%autoci
+	citype FICMRCI	#FICMRCI, FICDDCI3, FICMRCEPA0
+	nel n		#有效电子数目
+	norb m		#有效轨道数目
+	Mult M		#多重度
+	NRoots N
+end
+	\end{lstlisting}
+	
+	收缩和未收缩的MRCI方法都可以与RI结合使用。通常来说，MRCI计算非常昂贵，因此应谨慎设计计算任务。
+	
+	\section{光谱性质和其他性质的计算} 
+	
+	\subsection{电极矩和极化率} 
+	
+	\begin{lstlisting}
+%elprop 
+	dipole true	#计算偶极矩
+	quadrupole true	#计算电四极矩
+	polar 1		#用解析导数计算极化率
+end
+	\end{lstlisting}
+	
+	此输入块将产生偶极矩矢量（以a.u.和Debye表示），包括有关旋转参数，四极矩（作为对角化全张量形式）的一些信息，并运行CP-SCF计算以获得极化率张量（对角化的，以笛卡尔坐标给出）。请注意，极化性的解析导数仅在HF和DFT级别的方法下可用。对于其他方法，ORCA可将极化率计算为有限差分。
+	
+	\begin{lstlisting}
+%elprop 
+	polar 3 	#用纯数值梯度计算极化率
+	efield 1e-5	#此值被用于有限差分中，需要手动调整
+end
+	\end{lstlisting}
+	
+	为此，就像所有使用数值梯度的情况一样，强烈建议使用非常严格的SCF标准（\cmd{VeryTightSCF}）。对于内置了偶极矩的解析倒数的方法（如MP2）来说，极化率可以用混合解析/数值导数来求解，只需使用与上述相同的输入，但输入\cmd{polar 3}。
+	
+	\subsection{核磁共振参数} 
+	\begin{lstlisting}
+! NMR
+	\end{lstlisting}
+	HF和DFT及以上等级的方法（不包括范围分隔的混合方法）以及RI-MP2和双杂交DFT功能（带有RI）都可以用于计算磁屏蔽。TPSS和M06L通常是一个不错的选择。同时支持隐式溶剂化（CPCM）。建议将pcSseg-n基组与def2/JK基组组合使用（即使使用非杂化泛函）。对于RIJCOSX，应使用较大的格点，例如：
+	\begin{lstlisting}
+! GridX6 NoFinalGridX
+%eprnmr GIAO_2el GIAO_2el_RIJCOSX end 
+#也可为GIAO积分使用RIJCOSX，默认使用GIAO_2el_RIJK
+	\end{lstlisting}
+	请记得用相同的方法和基组对参考分子（例如四甲基硅烷）进行计算，随后可计算化学位移：\[\delta_{mol}=\sigma_{ref}-\sigma_{mol}\]
+	
+	更多功能和选项请参考手册。
+	
+	HF和DFT及以上的方法也可以计算自旋耦合（J耦合）常数：
+	\begin{lstlisting}
+%eprnmr 
+	Nuclei = all H {ssall, ist = 1 } 
+	#假定所有氢都是氕，为所有氢计算耦合常数
+	SpinSpinRThresh 6.0	#为最远为6埃的原子间计算耦合常数
+end
+	\end{lstlisting}
+	
+	\subsection{电子顺磁共振参数} 
+	EPR参数（g张量，D张量，超精细耦合常数（HFC）等）可以用HF，DFT和混合DFT级别的方法进行计算。
+	这些参数的计算可以使用输入文件中的\cmd{\%eprnmr}模块来引出：
+	\begin{lstlisting}
+%eprnmr
+	gtensor 1 #计算g张量
+	dtensor 
+		so		#计算d张量的自旋-轨道部分
+		ss		#计算d张量的自旋-自旋部分 
+		ssandso		#计算d张量的自旋-轨道部分和自旋-轨道部分
+	DSOC cp 		#默认方法：耦合微扰法
+	DSS uno 		#使用UNO的自旋密度
+	Ori centerofelcharge	#默认：指定电荷中心
+		n		#中心的电荷数
+		x,y,z		#中心位置
+	solver 			#指定解CP-SCF方程的方法 
+		pople		#默认选项：polpe法
+		cg		#共轭梯度法
+	Nuclei = all types {FLAGS} #计算超精细耦合常数
+	PrintLevel N    	#控制输出量，默认为2
+end
+	\end{lstlisting}
+	
+	注意：例如，在计算这些属性（尤其是使用DFT或杂化泛函）时，正确选择泛函和基集非常重要。杂化泛函（B3LYP，TPSSh，PBE0）可提供可靠的结果。像B2PLYP这样的双杂化泛函更昂贵，但可以获得更好的结果。基组，例如EPR-II，EPR-III，IGLO-II和IGLO-III，增加了核心区域的柔韧性，因此对于有机基团表现良好。在许多情况下，基于CASSCF / NEVPT2计算得波函数的EPR参数比DFT（特别是对于过渡金属配合物）更可靠。有关详细信息，请参见CASSCF教程和手册。
+	
+	\subsection{Mößbauer光谱参数} 
+	
+	这些参数可通过\cmd{\%EPRNMR}代码块来计算。
+	\begin{lstlisting}
+%eprnmr
+	nuclei = all Fe {fgrad, rho}
+	#rho是铁原子的电荷密度，fgrad是电场梯度和电四极矩分裂参数
+	origin CenterOfMass
+	CenterOfNucCharge
+	CenterOfElCharge
+	PrintLevel n 
+end
+	\end{lstlisting}
+	
+	对于这些计算，建议对铁使用核心属性基准CP（PPP）基础，并且可以通过以下方式计算：
+	\begin{lstlisting}
+%basis NewGTO Fe CP(PPP) end
+	\end{lstlisting}
+	输出文件会包含以下的信息：
+	\begin{itemize}
+	\item Mößbauer电四极矩分裂参数
+	\item 电四极矩分裂 $e^{2qQ}$
+	\item 不对称指数 $\eta$ ($0\leq\eta\leq1$) 
+	\item $\Delta_{EQ}=\frac{1}{2}{e^{2qQ}}\times \sqrt{1+\frac{1}{3}\times\eta^{2}}$
+	\item 铁原子处电子密度 $\rho_0$
+	\end{itemize}
+	
+	在DLPNO-CCSD级别计算Mößbauer参数可通过以下命令实现：
+	\begin{lstlisting}
+! RHF DLPNO-CCSD	#自旋数为0
+! UHF/UKS DLPNO-CCSD	#自旋数不为0
+%mdci DenMat UnRelaxed end
+	\end{lstlisting}
+	
+	\subsection{振动光谱} 
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{关键词}         & \textbf{功能 }         \\
+			\midrule
+			\cmd{! Freq}   & 用解析导数计算红外光谱 \\
+			\cmd{! NumFreq} & 用数值梯度计算红外光谱\\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	若需计算拉曼光谱和去极化率，则必须使用\cmd{! NumFreq}，同时输入以下关键词：
+	
+	\begin{lstlisting}
+%elprop polar 1 end
+	\end{lstlisting}
+	
+	以上命令可以计算拉曼光谱，包括吸收度和去极化率。
+	
+	若要进行NRVS计算，则需频率计算完成后，对hessian文件（扩展名为\file{.hess}）运行以下组件：
+	
+	\begin{lstlisting}
+orca_vib MyJob.hess > MyJob.vib.out 
+orca_mapspc MyJob.vib.out NRVS
+	\end{lstlisting}
+	
+	这一流程会产生未经处理的\file{MyJob.vib.out.stk}和经过修饰的\file{MyJob.vib.out.dat}两个NRVS光谱文件。这些ASCII文件可以被任何作图软件读取。要注意NRVS计算只对含铁体系有效。
+	
+	若要进行共振拉曼光谱计算，则需要三步。
+	\begin{enumerate}[1.]
+		\item 进行结构优化\cmd{! Opt Freq}，得到\file{.hess}文件。
+		\item 计算电子光谱，正态梯度和无量纲核位移。
+		\item 计算共振拉曼光谱
+	\end{enumerate}
+
+	\begin{lstlisting}
+! NMGrad
+%cis 
+	nroots	10	
+	maxdim 100
+end
+%rr
+	HessName "mycalc.hess"
+	ASAInput true
+	Tdnc 0.005
+	States 1,2,3,4,5,6,7,8,9,10
+end
+	\end{lstlisting}
+	
+	检查并分析计算出的电子光谱，并确定哪些计算出的谱带对应于实验观察到的谱带。高达100 nm的位移并不罕见！
+	修改新创建的文件\file{mycalc.asa.inp}，以通过添加波数（例如63500、63800和64000 cm-1）来包含激发能：
+	
+	\begin{lstlisting}
+RRSE 63500, 63800, 64000
+	\end{lstlisting}
+	
+	必须手动选择激发能，以便将实验激发模拟到电子光谱的一个波段中。因此，能量仅在达到实验和计算的电子光谱之间的完全一致的情况下才与激光的能量相同。还要调整asa输入文件中电子跃迁的线宽参数以及共振拉曼带的线宽参数，以匹配实验观察到的线宽。然后运行命令：
+	
+	\begin{lstlisting}
+orca_asa mycalc.asa.inp > mycalc.asa.out
+	\end{lstlisting}
+	
+	就得到了光谱文件\file{mycalc.asa.rrs.63500.stk}和\file{mycalc.asa.rrs.63500.dat}。
+	
+	\subsection{可见光谱} 
+	
+	紫外和可见吸收光谱（UV / vis），（电子）圆二色光谱（CD）和磁性圆二色光谱（MCD）是可以用来检测分子电子激发态的方法。
+	
+	ORCA提供了多种不同的方法来计算电子激发态，最主要的是TDDFT，CASSCF / NEVPT2，MRCI，ROCIS，以及EOM-CC和STEOM-CC方法。
+	
+	每次TDDFT，CASSCF，NEVPT2和MRCI计算结束时，都会自动输出跃迁偶极矩和旋转强度（分别用于UV / Vis和CD光谱）。对于EOM-CC和STEOM-CC方法，过渡偶极矩也会在计算结束时自动打印出来，但是目前没有旋转强度。在ROCIS中，会自动输出过渡偶极矩，但必须用下列命令来输出旋转强度：
+	
+	\begin{lstlisting}
+%rocis
+	docd true 
+	doquad true
+end
+	\end{lstlisting}
+	
+	MCD结果可以由CASSCF（包括NEVPT2），MRCI和ROCIS模块生成。输入文件中的各个部分如下所示（有关其他关键字的信息，请参考不同方法的专用部分）
+	
+	\begin{lstlisting}
+%casscf 
+	rel
+		dosoc true		#打开自旋-轨道耦合
+		mcd true		#使用MCD
+		B 43500			#静磁场强度，单位是高斯
+		Temperature 299.0	#温度
+	end 
+end
+%mrci
+	soc
+		dosoc true 
+		mcd true
+		B 43500
+		Temperature 299.0 
+	end
+end
+%rocis 
+	soc true
+	domcd true 
+	B 43500
+	SOCTemp 299.0
+end
+	\end{lstlisting}
+	
+	\subsection{荧光吸收和磷光寿命与谱带} 
+	
+	要计算发光率、荧光光谱以及吸收光谱，至少需要基态结构和一个Hessian矩阵。首先用\cmd{! Opt Freq}优化你的结构，随后唤出\module{ORCA\_ESD}模组，用下面的关键词开始计算：
+	
+	\begin{lstlisting}
+! ESD(ABS) or ESD(FLUOR)
+%tddft nroots 10 end
+%esd GSHessian “Basename.hess” states 1,2,3,4...
+end
+	\end{lstlisting}
+	
+	光谱信息将保存在\file{Basename.spectrum}文件中，发光率、吸收率会在输出文件中给出。
+	
+	
+	您必须选择一种激发态方法才能计算梯度和跃迁偶极子。目前，\module{ORCA\_ESD}最适合TDDFT，但它也可与ROCIS，（ST）EOM和CASSCF（无解析梯度）一起使用。第二个输入中的分子结构必须与\file{.hess}文件中的分子结构相同。这可以在优化后从\file{Basename.xyz}中找到，也可以从\file{.hess}复制（注意，单位是Bohrs）。要在弱过渡中包括振动耦合（Herzberg-Teller效应），请在\cmd{\%ESD}中将设置为\cmd{DOHT TRUE}。
+	
+	如果您想要更高质量的光谱，请设置\cmd{Hessflag AHAS}，手册中有详细信息。
+	
+	计算磷光时，必须使用UHF/UKS方法来优化三重态，并对两个分子结构都输入对应的Hessian矩阵以及它们之间的能量差（以波数表示）。在这种情况下，您还必须手动在每个模块设置SOC。
+	
+	\begin{lstlisting}
+!ESD(PHOSP)
+%tddft	
+	nroots	10
+	doSOC	TRUE
+end
+%esd	
+	GSHessian “Basename.hess” 
+	TSHessian “Basename_T.hess” 
+	delE	20000
+	states	1
+end
+	\end{lstlisting}
+	
+	除此以外，谐振拉曼光谱也可以使用类似的方法计算，但必须设置激光能量，如：
+	
+	\begin{lstlisting}
+! ESD(RR)
+%tddft nroots 10 end
+%esd	
+	GSHessian “Basename.hess” 
+	states 1,2,3,4…
+	laserE	15000
+end
+	\end{lstlisting}
+	
+	\subsection{X射线吸收和发射光谱} 
+	
+	ORCA具有多种可X射线吸收和发射光谱方法。
+	
+	TD-DFT可用于计算过渡金属复合物的预边缘K边缘的X射线吸收光谱。
+	
+	\begin{lstlisting}
+%tddft
+	NRoots 80	
+	MaxDim 500
+	OrbWin[0] = 0,0,-1,-1	
+	#对RKS参考函数，选择从1s轨道(0,0)到整个(-1,1)接受空间的激发
+	Doquad true	#计算四极极子和磁偶极子的贡献
+end
+	\end{lstlisting}
+	
+	ROCIS或ROCIS/DFT也可用于计算X射线吸收光谱。事实上，该方法被专门设计用于处理过渡金属复合物中的金属 L/M 边缘问题。
+	
+	\begin{lstlisting}
+%rocis 
+	NRoots 80
+	SOC true	
+	DoRI true	
+	PrintLevel 3
+	DoLowerMult true	#在S’=S-1处进行CI计算
+	DoHigherMult true	#在S’=S+1处进行CI计算
+	OrbWin = 6,8,0,2000	
+	#计算从2p轨道(6，8)到上限（默认值为2000）(0，2000)的激发
+end
+	\end{lstlisting}
+	
+	该方法还可用于计算共振非弹性 X 射线散射 （RIXS） 和谐振 X 射线发射 （RXES） 光谱，而大分子的 X 射线吸收光谱则可以通过采用这些方法的 PNO 版本（core PNO-ROCIS、core PNO-ROCIS/DFT）来计算。详细信息见手册。
+	
+	
+	CASCI/NEVPT2 还可用于对 X 射线光谱计算。这个过程有很多步，不能完全自动完成，需要用户理解计算过程。总而言之有以下几点：
+	\begin{enumerate}[1.]
+		\item  现有SA-CASSCF价电子计算的轨道用作输入
+		\item 冻结原子核处理被明确停用
+		\item 要计算的核心轨道需旋转到工作区
+		\item 需使用事先优化好的轨道，再在单核激发电子空间内解决CASCI/NEVPT2问题
+		
+	\end{enumerate}
+
+	此方法还可用于计算 RIXS 和 RXES 光谱。手册提供了更多信息。
+	
+	\begin{lstlisting}
+! MoRead
+%moinp "MOs.gbw"
+%method
+	FrozenCore FC NONE
+end
+%scf
+	rotate {6,39,90} {7,40,90} {8,41,90} end
+end
+%casscf
+	nel 11		#电子数
+	norb 8		#轨道数
+	mult 6,4	#要计算的多重度
+	nroots 16,173 
+	nevpt2 true	
+	maxiter 1	#迭代次数，对CASCI/NEVPT2计算来说需要设置成1
+end
+	\end{lstlisting}
+	
+	基于DFT轨道和轨道能量的单电子方法提供了计算X射线吸收和X射线发射强度的更为简单的方法。此方法还可用于计算价电子-原子核共振 X 射线发射光谱 （VtC RXES） 。手册提供了更多信息。
+	
+	\section{分析工具和接口}
+	
+	\subsection{布居分析} 
+	
+	默认情况下，在计算完自洽场后会自动执行Mulliken布居分析、Loewdin布居分析和Mayer布居分析。下面是手动设置是否分析的关键词：
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{关键词 }           & \textbf{功能}             \\
+			\midrule
+			 \cmd{! NoMulliken}  & 关闭Mulliken布居分析 \\
+			 \cmd{! NoLoewdin}   & 关闭Loewdin布居分析  \\
+			 \cmd{! NoMayer}     & 关闭Loewdin布居分析  \\
+			 \cmd{! Allpop}      & 开启所有布居分析       \\
+			 \cmd{! NoPop}       & 关闭所有布居分析      \\
+			 \bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\subsection{局部能量分解} 
+	
+	局部能量分解(LED)是一种从物理角度分析DLPNO耦合簇能量的方法（例如静电相互作用和分散能）。进行DLPNO-CCSD或DLPNO-CCSD（T）计算后，将原子分配给片段，就可以进行分析，如下例所示：
+	
+	\begin{lstlisting}
+! LED
+%mdci printlevel 3 end
+*	xyz 0 1
+O(1)	-0.03927172712553	-0.05314132591150	0.08218758558907
+H(1)	0.93067536168966	-0.05970332184924	0.07804455467818
+H(1)	-0.28396499015190	0.88544835339923	0.07926277816645
+O(2)	-0.90315523402475	-1.18937566538863	2.59796265057253
+H(2)	-0.64227331879731	-0.83788044760509	1.72189785393425
+H(2)	-1.47240409159018	-1.94579659264477	2.39478357705952
+	\end{lstlisting}
+	
+	在此示例中，二聚体的能量被分配给了分子结构中的每个水分子。
+	
+	\subsection{从头算起的配体场论} 
+	
+	用户必须确保体系中的活跃轨道只有5个d轨道（对d区元素）或7个f轨道（对f区元素），随后可通过如下命令开始计算：
+	
+	\begin{lstlisting}
+%casscf actorbs dorbs end
+  或
+%casscf actorbs forbs end
+	\end{lstlisting}
+	计算将自动输出配体场和Racah参数供后续的人工分析。
+	
+	\subsection{自然键轨道分析} 
+	
+	
+\begin{table}[H]
+	\centering
+	\begin{tabular}{ll}
+		\toprule
+		\textbf{命令  }    & \textbf{功能 }       \\
+		\midrule
+		\cmd{! NPA} & 进行自然布局分析  \\
+		\cmd{! NBO} & 进行自然键轨道分析\\
+		\bottomrule
+	\end{tabular}
+\end{table}
+	也可以使用后HF方法来进行NBO分析：
+	
+	\begin{lstlisting}
+! MP2 NBO
+%MP2 density relaxed end
+	\end{lstlisting}
+	
+	计算将生成一个\file{.47}文件，用户可以在独立运行NBO程序之前对其进行操作。
+	
+	\subsection{分子中的原子理论} 
+	
+	\begin{lstlisting}
+! AIM
+	\end{lstlisting}
+	
+	用上述关键词计算会生成\file{.wfn}文件以进行拓扑分析。也可以使用\module{orca\_2aim}读取\file{.gbw}文件来生成\file{.wfn}文件。
+	
+	\section{可视化工具和接口}
+	
+	\subsection{可视化规范轨道} 
+	\begin{enumerate}[1.]
+		\item 将\file{.gbw}文件转换为“Molden”格式：\cmd{orca\_2mkl “filename” -molden}
+		\item 通过任何可视化工具（例如Avogadro）读入生成的文件
+	\end{enumerate}
+
+	
+	以其他格式存储的其他类型的轨道也可以以相同的方式可视化，只需将后缀更改为\file{.gbw}。如：
+	
+	\begin{lstlisting}
+mv filename.loc filename.gbw
+	\end{lstlisting}
+	
+	\subsection{可视化电子密度} 
+	\begin{enumerate}[1.]
+		\item 运行\module{orca\_plot}并遵照指示操作。\cmd{orca\_plot filename.gbw -i}
+		\item 使用任何可视化工具来读取生成的文件，例如Chimera
+	\end{enumerate}
+
+	\subsection{可视化轨迹} 
+	
+	最方便的办法是使用Molden读取\file{.trj}文件：
+	
+	\begin{lstlisting}
+Molden filename.trj
+	\end{lstlisting}
+	
+	\subsection{振动可视化} 
+	
+	最方便的办法是使用Avogadro读取输出文件：
+	
+	\begin{lstlisting}
+Avogadro filename.out
+	\end{lstlisting}
+	
+	\subsection{绘制光谱} 
+	
+	光谱可通过组件\module{orca\_mapspc}得到：
+	
+	\begin{lstlisting}
+orca_mapspc outputfile -<type of spectrum> -options
+	\end{lstlisting}
+	
+	支持的光谱类型有：
+	- ABS	
+	- ABSV	
+	- ABSQ	
+	- CD	
+	- IR	
+	- Raman
+	- NRVS	
+	- VDOS	
+	- MCD	
+	- SOCABS	
+	- XES	
+	- XESV
+	- XESQ	
+	- XAS	
+	- XASV	
+	- XASQ	
+	- XESSOC	
+	- XASSOC
+	
+	选项包括：
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{选项}    & \textbf{效果}                  \\
+			\midrule
+			-o  & 输出结果到文件             \\
+			-cm & 默认选项，使用$cm^{-1}$为单位 \\
+			-eV & 使用eV为单位             \\
+			-g  & 默认选项，使用高斯线型         \\
+			-l  & 使用洛伦兹线型             \\
+		-x0 & 谱图初始点               \\
+			-x1 & 谱图重点                \\
+		-w  & 线宽                  \\
+			-kw & 线宽系数                \\
+			-n  & 点数           \\
+			\midrule      
+		\end{tabular}
+	\end{table}
+	
+	例如使用默认展宽在300-4000 $cm^{-1}$区域绘制红外光谱：
+	
+	\begin{lstlisting}
+orca_mapspc jobname.out IR -x0300 -x14000
+	\end{lstlisting}
+	
+	\section{ORCA文件类型}
+	
+	ORCA会根据不同的计算任务生成一系列文件。
+	\begin{table}[H]
+		\centering
+		\begin{tabularx}{0.9\linewidth}{lX}
+			\toprule
+			 \textbf{文件格式 }         & \textbf{功能 }
+			       \\    \midrule                                                                                                                       
+			 \file{.gbw}              & 包含有关分子结构，基组和波函数（轨道）的信息。可以用作后续计算中的初猜。可以用\module{orca\_plot}绘制分子轨道，电子密度... \\
+			 \file{.loc}              & gbw型文件，包含定域轨道信息（通过\cmd{\%loc}块生成）                                                                                      \\
+			 \file{.uno}              & gbw型文件，包含有关不受限制的自然轨道的信息（由\cmd{! UNO}生成）                    \\
+			 \file{.unso}           & gbw型文件，包含有关不受限制的自然自旋轨道的信息（由\cmd{! UNO}生成）                                                                \\
+			 \file{.qro}   & gbw型文件，包含有关准受限轨道的信息（由\cmd{! UNO}生成）                                                                                  \\
+			 \file{.uco} &gbw型文件，包含有关不受限制的相应轨道的信息（由\cmd{! UCO}生成）。                                                                       \\
+			\file{.xyz}              & 坐标文件，包含结构优化后的优化结构。如果优化不成功，则包含最后一步的几何图形（由\cmd{! Opt}生成）。可以通过标准分子可视化程序进行可视化。 \\
+		\file{.trj}            & 结构优化的轨迹。包含用于柔性表面扫描的所有步骤的整个轨迹（由\cmd{! Opt \%geom Scan...}生成）。                                          \\
+		 \file{.hess}            & 包含Hessian矩阵（频率计算）。可以用作\module{orca\_vib}或\module{orca\_pltvib}的输入。                                        \\                       
+		 \file{.00n.xyz}          & 柔性表面扫描的第n个优化结构的坐标文件。  \\                                                                                             
+		 \file{.00n.gbw}          & 柔性表面扫描的第n个优化结构的gbw文件。  \\                                                                                              
+	 \file{.allxyz}           & 坐标文件，包含松弛表面扫描的所有优化结构，可以用作坐标文件，用于在扫描的所有优化结构上进行单点能计算。   \\                        
+		 \file{.relaxscanscf.dat} & 数据文件，包含柔性扫描中所有优化结构的SCF能量    \\                                                                                     
+		 \file{.relaxscanact.dat} & 数据文件，包含柔性扫描中所有优化结构的实际（SCF或后HF）能量  \\                                                                         
+		 \file{.nto}              & gbw型文件，包含有关TDDFT计算中的自然过渡轨道的信息    \\                                                                                
+		\file{.scfp}             & 包含电子密度矩阵（由\cmd{! KeepDens}生成）                   \\                                                                             
+			\bottomrule
+	\end{tabularx}
+	\end{table}
+	
+	
+\end{document}
