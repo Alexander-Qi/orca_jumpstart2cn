@@ -924,7 +924,7 @@ end
 			\midrule
 			 \cmd{! NoMulliken}  & 关闭Mulliken布居分析 \\
 			 \cmd{! NoLoewdin}   & 关闭Loewdin布居分析  \\
-			 \cmd{! NoMayer}     & 关闭Loewdin布居分析  \\
+			 \cmd{! NoMayer}     & 关闭Mayer布居分析  \\
 			 \cmd{! Allpop}      & 开启所有布居分析       \\
 			 \cmd{! NoPop}       & 关闭所有布居分析      \\
 			 \bottomrule
@@ -1104,7 +1104,7 @@ orca_mapspc jobname.out IR -x0300 -x14000
 			 \file{.uco} &gbw型文件，包含有关不受限制的相应轨道的信息（由\cmd{! UCO}生成）。                                                                       \\
 			\file{.xyz}              & 坐标文件，包含结构优化后的优化结构。如果优化不成功，则包含最后一步的几何图形（由\cmd{! Opt}生成）。可以通过标准分子可视化程序进行可视化。 \\
 		\file{.trj}            & 结构优化的轨迹。包含用于柔性表面扫描的所有步骤的整个轨迹（由\cmd{! Opt \%geom Scan...}生成）。                                          \\
-		 \file{.hess}            & 包含Hessian矩阵（频率计算）。可以用作\module{orca\_vib}或\module{orca\_pltvib}的输入。                                        \\                       
+		 \file{.hess}            & 包含 Hessian 矩阵，由频率计算输出。 可以用作 \module{orca\_vib} 或 \module{orca\_pltvib} 的输入。                                        \\                       
 		 \file{.00n.xyz}          & 柔性表面扫描的第n个优化结构的坐标文件。  \\                                                                                             
 		 \file{.00n.gbw}          & 柔性表面扫描的第n个优化结构的gbw文件。  \\                                                                                              
 	 \file{.allxyz}           & 坐标文件，包含松弛表面扫描的所有优化结构，可以用作坐标文件，用于在扫描的所有优化结构上进行单点能计算。   \\                        
