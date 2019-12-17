@@ -52,9 +52,9 @@
 	frame=shadowbox%用方框框住代码块
 }
 
-\newcommand{\cmd}[1]{\textcolor{orange}{ \texttt{#1} }}
-\newcommand{\module}[1]{\fcolorbox{gray}{yellow}{ \texttt{#1} }}
-\newcommand{\file}[1]{\textcolor{teal}{ \texttt{#1} }}
+\newcommand{\cmd}[1]{ \textcolor{orange}{\texttt{#1}} }
+\newcommand{\module}[1]{ \fcolorbox{gray}{yellow}{\texttt{#1}} }
+\newcommand{\file}[1]{ \textcolor{teal}{\texttt{#1}} }
 
 \begin{document}
 
@@ -64,9 +64,13 @@
 	\section*{译者序}
 	本文原文是2018年3月Frank Neese和Christoph Riplinger等人编著的\textit{Jump-Start Guide}，适用的ORCA版本为4.1，不过其中的大部分内容应该对4.0以后的版本是通用的。大家可以放心使用。本文旨在为想快速入门量子化学软件套装ORCA（后文中用ORCA指代）的用户提供指南，并不能替代ORCA用户手册。原版ORCA手册可以在\href{https://hostr.co/ElQbdeKxt5jQ}{这里}下载。原作者关于CASSCF的教程可以在\href{https://hostr.co/0y7fujk5KEAa}{这里}下载。
 	
-	本文译者是戚鉴清，翻译完成时为清华大学化学系本科二年级的学生。限于译者的业务水平限制，本书中不可避免地存在翻译不当的地方。英文原文的文档可以在\href{https://hostr.co/i613jRFj7YNo}{这里}找到。欢迎读者通过\href{mailto:alexanderqi126@outlook.com}{邮件}联系指正！
+	限于译者的业务水平限制，本书中不可避免地存在翻译不当的地方。英文原文的文档可以在\href{https://hostr.co/i613jRFj7YNo}{这里}找到。欢迎读者通过\href{mailto:alexanderqi126@outlook.com}{邮件}联系指正！
 		
-
+	读者使用本文内容时请注意规范地引用本文。GB/T 7714-2005标准下的参考引用格式为：
+	\begin{quotation}
+	[1][德]弗兰克·内斯和克里斯托夫·里普林格(Frank Neese and Christoph Riplinger). 量子化学软件ORCA快速入门指南[T]. 戚鉴清. 2019. \url{https://alexander-qi.github.io/2019/12/11/orcajumpstart/}	
+	\end{quotation}
+	
 	
 	
 	\begin{flushright}
@@ -94,7 +98,7 @@
 ! {Keywords} 			#控制了方法、基组、工作类型
 ! moread 		#备选项：让程序从已有的分子轨道开始计算需要%moinp关键词
 %moinp “MyInp.gbw” 		#备选项：在此处输入已有的轨道信息
-%maxcore 4096 			#备选项：以MB为单位，限制临时文件的大小
+%maxcore 4096 			#备选项：以MB为单位，限制使用内存的大小
 %base “MyBaseName” 		#备选项：规定临时文件的文件名
 * xyz {Charge} {Mult} 		#输入坐标类型，电荷和自旋多重度
 C 1.23 16.481 -9.87 		#笛卡尔坐标的默认单位是埃
@@ -611,7 +615,7 @@ end
 	\begin{lstlisting}
 ! NMR
 	\end{lstlisting}
-	HF和DFT及以上等级的方法（不包括范围分隔的混合方法）以及RI-MP2和双杂交DFT功能（带有RI）都可以用于计算磁屏蔽。TPSS和M06L通常是一个不错的选择。同时支持隐式溶剂化（CPCM）。建议将pcSseg-n基组与def2/JK基组组合使用（即使使用非杂化泛函）。对于RIJCOSX，应使用较大的格点，例如：
+	HF和DFT及以上等级的方法（不包括范围分隔的杂化泛函）以及RI-MP2和RI-双杂化泛函都可以用于计算磁屏蔽。TPSS和M06L通常是一个不错的选择。同时支持隐式溶剂化（CPCM）。建议将pcSseg-n基组与def2/JK基组组合使用（即使使用非杂化泛函）。对于RIJCOSX，应使用较大的格点，例如：
 	\begin{lstlisting}
 ! GridX6 NoFinalGridX
 %eprnmr GIAO_2el GIAO_2el_RIJCOSX end 
@@ -812,7 +816,7 @@ end
 	光谱信息将保存在\file{Basename.spectrum}文件中，发光率、吸收率会在输出文件中给出。
 	
 	
-	您必须选择一种激发态方法才能计算梯度和跃迁偶极子。目前，\module{ORCA\_ESD}最适合TDDFT，但它也可与ROCIS，（ST）EOM和CASSCF（无解析梯度）一起使用。第二个输入中的分子结构必须与\file{.hess}文件中的分子结构相同。这可以在优化后从\file{Basename.xyz}中找到，也可以从\file{.hess}复制（注意，单位是Bohrs）。要在弱过渡中包括振动耦合（Herzberg-Teller效应），请在\cmd{\%ESD}中将设置为\cmd{DOHT TRUE}。
+	用户必须选择一种激发态方法才能计算梯度和跃迁偶极子。目前，最适合\module{ORCA\_ESD}的方法是TDDFT，但也可以使用ROCIS、(ST)EOM和CASSCF（无解析梯度）。第二个输入中的分子结构必须与\file{.hess}文件中的分子结构相同。这可以在优化后从\file{Basename.xyz}中找到，也可以从\file{.hess}复制（注意，单位是Bohrs）。要在弱过渡中计算振动耦合（Herzberg-Teller效应），请在\cmd{\%ESD}中将设置为\cmd{DOHT TRUE}。
 	
 	如果您想要更高质量的光谱，请设置\cmd{Hessflag AHAS}，手册中有详细信息。
 	

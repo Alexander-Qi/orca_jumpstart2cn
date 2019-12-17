@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018/W32TeX) (preloaded format=xelatex 2019.1.27)  14 DEC 2019 12:41
+This is XeTeX, Version 3.14159265-2.6-0.99999 (TeX Live 2018/W32TeX) (preloaded format=xelatex 2019.1.27)  17 DEC 2019 14:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1040,34 +1040,6 @@ File: fig/covb.pdf Graphic file (type pdf)
 [1
 
 ]
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-Invalid UTF-8 byte or sequence at line 73 replaced by U+FFFD.
-File: fig/sign.eps Graphic file (type eps)
-<fig/sign.eps>
-
-
-Package Fancyhdr Warning: \headheight is too small (12.0pt): 
-Make it at least 12.64723pt.
-We now make it that large for the rest of the document.
-This may cause the page layout to be inconsistent, however.
-
-[2] (./jumps.toc
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.53937> on input line 9.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 9.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 9.
- [3])
-\tf@toc=\write4
-\openout4 = `jumps.toc'.
-
- [4]
 
 Package fontspec Info: Could not resolve font "FangSong/BI" (it probably
 (fontspec)             doesn't exist).
@@ -1091,14 +1063,33 @@ Package fontspec Info: Font family 'FangSong(0)' created for font 'FangSong'
 (fontspec)             <->"FangSong/OT:script=hani;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.53937> on input line 71.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 71.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 71.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+Invalid UTF-8 byte or sequence at line 77 replaced by U+FFFD.
+File: fig/sign.eps Graphic file (type eps)
+<fig/sign.eps>
 
-Overfull \hbox (24.26941pt too wide) in paragraph at lines 86--87
-[]\TU/SimSun(0)/m/n/10.53937 运 行 命 令[]\TU/lmtt/m/n/10.53937 orca MyJob.inp >& M
-yJob.out & []\TU/SimSun(0)/m/n/10.53937 。|  这 个 命 令 至 少 会 产 生[]\TU/lmtt/m/n/10.
-53937 MyJob.out []\TU/SimSun(0)/m/n/10.53937 和[]\TU/lmtt/m/n/10.53937 MyJob.gbw
- []\TU/SimSun(0)/m/n/10.53937 两 个 文 件。| []\TU/lmtt/m/n/10.53937 MyJob.gbw
- []
 
+Package Fancyhdr Warning: \headheight is too small (12.0pt): 
+Make it at least 12.64723pt.
+We now make it that large for the rest of the document.
+This may cause the page layout to be inconsistent, however.
+
+[2] (./jumps.toc [3])
+\tf@toc=\write4
+\openout4 = `jumps.toc'.
+
+ [4]
 
 Package fontspec Info: Font family 'Consolas(0)' created for font 'Consolas'
 (fontspec)             with options [].
@@ -1119,31 +1110,31 @@ Package fontspec Info: Font family 'Consolas(0)' created for font 'Consolas'
 (fontspec)             <->"Consolas/BI/OT:script=latn;language=DFLT;"
 (fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
 
-[5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20]
-[21] [22] [23] [24] [25] [26]
-Underfull \hbox (badness 5036) in paragraph at lines 1116--1116
+ [5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15]
+[16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26]
+Underfull \hbox (badness 2042) in paragraph at lines 1120--1120
 []|\TU/SimSun(0)/m/n/10.53937 包 含 \TU/lmr/m/n/10.53937 Hessian \TU/SimSun(0)/m/
-n/10.53937 矩 阵，|  由 频 率 计 算 输 出。|  可 以 用 作 [][][] 或
+n/10.53937 矩 阵，|  由 频 率 计 算 输 出。|  可 以 用 作  [][][]  或
  []
 
 [27]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1120.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1124.
 Package atenddvi Info: Last page = 28.
  [28]
-Package atveryend Info: Executing hook `AfterLastShipout' on input line 1120.
+Package atveryend Info: Executing hook `AfterLastShipout' on input line 1124.
  (./jumps.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1120.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1120.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1124.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1124.
 
 Package rerunfilecheck Info: File `jumps.out' has not changed.
 (rerunfilecheck)             Checksum: 77B1FF0CCDC4F6436EB0FBFE15EDC939.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1120.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1124.
  ) 
 Here is how much of TeX's memory you used:
- 27414 strings out of 492933
- 561375 string characters out of 6125513
+ 27415 strings out of 492933
+ 561392 string characters out of 6125513
  729748 words of memory out of 5000000
- 31131 multiletter control sequences out of 15000+600000
+ 31132 multiletter control sequences out of 15000+600000
  534056 words of font info for 71 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  54i,18n,68p,807b,33187s stack positions out of 5000i,500n,10000p,200000b,80000s
